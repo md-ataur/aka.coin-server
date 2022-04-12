@@ -25,6 +25,7 @@ async function run() {
         await client.connect();
         const database = client.db("myDBStore");
         const heroCollection = database.collection("hero");
+        const walletCollection = database.collection("wallet");
 
         // POST API to add hero
         app.post('/hero', async (req, res) => {
@@ -70,6 +71,55 @@ async function run() {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await heroCollection.deleteOne(query);
+            res.json(result);
+        });
+
+        // POST API to add wallet
+        app.post('/wallet', async (req, res) => {
+            const wallet = req.body;
+            const result = await walletCollection.insertOne(wallet);
+            res.json(result);
+        });
+
+        // GET API to get data
+        app.get('/wallet', async (req, res) => {
+            const cursor = walletCollection.find({});
+            const result = await cursor.toArray();
+            res.send(result);
+        });
+
+        // GET API to get single data by id
+        app.get('/wallet/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const data = await walletCollection.findOne(query);
+            res.send(data);
+        });
+
+        // PUT API to update data
+        app.put('/wallet/:id', async (req, res) => {
+            const id = req.params.id;
+            const updateData = req.body;
+            const query = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    title: updateData.title,
+                    imageIcon: updateData.imageIcon,
+                    description: updateData.description,
+                    bgImage: updateData.bgImage,
+                    color: updateData.color
+                },
+            };
+            const result = await walletCollection.updateOne(query, updateDoc, options);
+            res.json(result)
+        });
+
+        // DELETE API to delete data
+        app.delete('/wallet/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await walletCollection.deleteOne(query);
             res.json(result);
         });
 
